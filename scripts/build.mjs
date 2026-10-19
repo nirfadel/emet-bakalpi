@@ -6,7 +6,10 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const site = (process.argv[2] || process.env.SITE_URL || '').replace(/\/$/, '');
+// Social crawlers need an absolute, public URL for og:image. On Vercel the production domain is provided automatically
+// (a deployment-specific URL sits behind Vercel Authentication, so it must not be used).
+const prodHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+const site = (process.argv[2] || (prodHost ? `https://${prodHost}` : '') || process.env.SITE_URL || '').replace(/\/$/, '');
 // The deployed page loads data from /api/data, so the embedded snapshot is dropped to keep the page small.
 const body = (await readFile(path.join(root, 'index.html'), 'utf8'))
   .replace(/(<script type="application\/json" id="snapshot">)[\s\S]*?(<\/script>)/, '$1{}$2');

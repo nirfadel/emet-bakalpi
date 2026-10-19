@@ -384,6 +384,8 @@ footer { padding-top: 28px; font-size: .8rem; color: var(--ink-3); display: grid
     gl: { name: 'המשרוקית של גלובס', seg: 'המשרוקית', by: 'המשרוקית של גלובס', link: 'לבדיקה המלאה בגלובס' }
   };
   const EVIDENCE = { n12: 'כך זה הופץ', fr: 'מתוך פייקפדיה', gl: 'הפסיקה של המשרוקית' };
+  // the app's own public address, for shared text and story images (not inside a Claude preview)
+  const APP_URL = /^https?:$/.test(location.protocol) && !/claude|anthropic/.test(location.hostname) ? location.origin.replace(/^https?:\/\//, '') : '';
   const view = name => document.querySelector(`[data-view="${name}"]`);
 
   const $ = s => document.querySelector(s);
@@ -500,9 +502,10 @@ footer { padding-top: 28px; font-size: .8rem; color: var(--ink-3); display: grid
 
   function shareText(c) {
     const by = SOURCES[c.src].by;
-    if (c.verdict === 'check') return `🔎 ${c.claim}\n${c.truth}\n\nהבדיקה המלאה: ${by}\n${c.url}`;
+    const more = APP_URL ? `\n\nעוד שמועות מול האמת: https://${APP_URL}` : '';
+    if (c.verdict === 'check') return `🔎 ${c.claim}\n${c.truth}\n\nהבדיקה המלאה: ${by}\n${c.url}${more}`;
     const head = c.verdict === 'fake' ? `❌ פייק: ${c.claim}` : `✅ אמת: ${c.claim}`;
-    return `${head}\n✔️ האמת: ${brief(c.truth, 400)}\n\nמקור: ${by}\n${c.url}`;
+    return `${head}\n✔️ האמת: ${brief(c.truth, 400)}\n\nמקור: ${by}\n${c.url}${more}`;
   }
   const waLink = text => 'https://wa.me/?text=' + encodeURIComponent(text);
 
@@ -821,7 +824,8 @@ footer { padding-top: 28px; font-size: .8rem; color: var(--ink-3); display: grid
     ctx.fillStyle = '#0A1633'; ctx.font = '700 64px Karantina, sans-serif'; ctx.fillText('האמת בקלפי', 990, 150);
     ctx.fillStyle = '#8390A8'; ctx.font = '500 34px Rubik, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('בחירות 2026', 90, 168); ctx.textAlign = 'right';
     draw(ctx);
-    ctx.fillStyle = '#44506B'; ctx.font = '500 32px Rubik, sans-serif'; ctx.fillText('פייק זה פייק, לא משנה מאיזה צד.', 990, 1740);
+    ctx.fillStyle = '#44506B'; ctx.font = '500 32px Rubik, sans-serif'; ctx.fillText('פייק זה פייק, לא משנה מאיזה צד.', 990, APP_URL ? 1722 : 1740);
+    if (APP_URL) { ctx.fillStyle = '#0038B8'; ctx.font = '800 34px Rubik, sans-serif'; ctx.textAlign = 'left'; ctx.fillText(APP_URL, 90, 1770); ctx.textAlign = 'right'; }
     return new Promise(r => { try { cv.toBlob(r, 'image/png'); } catch { r(null); } });
   }
 
@@ -934,7 +938,7 @@ footer { padding-top: 28px; font-size: .8rem; color: var(--ink-3); display: grid
     $('#sheet').hidden = false;
   }
   const shareStory = c => { toast('מכינים את התמונה…'); openSheet(storyFor(c), shareText(c)); };
-  const shareScore = score => openSheet(scoreStory(score), `זיהיתי ${score}/${ROUND} פייקים ב"האמת בקלפי" (${rankFor(score)}). אתם תצליחו?\n${N12_URL}`);
+  const shareScore = score => openSheet(scoreStory(score), `זיהיתי ${score}/${ROUND} פייקים ב"האמת בקלפי" (${rankFor(score)}). אתם תצליחו?\n${APP_URL ? `https://${APP_URL}` : N12_URL}`);
   $('#sheetShare').addEventListener('click', async () => {
     try { await navigator.share({ files: [new File([sheetBlob], 'emet-bakalpi.png', { type: 'image/png' })], text: sheetText }); }
     catch { copy(sheetText); }
