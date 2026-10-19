@@ -1,0 +1,10 @@
+{
+  "name": "emet-bakalpi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "update-data": "node scripts/update-data.mjs",
+    "build:site": "node scripts/build.mjs"
+  },
+  "engines": { "node": ">=20" }
+}
