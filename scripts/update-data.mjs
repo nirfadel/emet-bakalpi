@@ -18,4 +18,4 @@ const htmlPath = path.join(root, 'index.html');
 const html = await readFile(htmlPath, 'utf8');
 const json = JSON.stringify(snapshot).replace(/</g, '\\u003c');
 await writeFile(htmlPath, html.replace(/(<script type="application\/json" id="snapshot">)[\s\S]*?(<\/script>)/, () => `<script type="application/json" id="snapshot">${json}</script>`));
-console.log(`Saved ${snapshot.n12.length + snapshot.fakereporter.length + snapshot.globes.length} items (${snapshot.fetchedAt})`);
+console.log(`Saved ${snapshot.n12.length + snapshot.fakereporter.length + snapshot.globes.length + snapshot.rulings.length} items (${snapshot.fetchedAt})`);
